@@ -7,8 +7,19 @@ RUN apt-get update && apt-get install -y libsqlite3-dev \
 # Apache mod_rewrite (htaccess kullanımı) iznini açın
 RUN a2enmod rewrite
 
+# Apache 403 Forbidden hatasını önlemek için dizin izni ekleyin
+RUN echo "<Directory /var/www/html>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>" > /etc/apache2/conf-available/custom-access.conf \
+    && a2enconf custom-access
+
 # Proje dosyalarını sunucuya kopyalayın
 COPY . /var/www/html/
+
+# SQLite veritabanı dosyasına yazma izni verin
+RUN chown -R www-data:www-data /var/www/html/
 
 # Çalışma portunu belirleyin
 EXPOSE 80
